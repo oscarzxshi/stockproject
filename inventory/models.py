@@ -34,7 +34,7 @@ class Location(models.Model):
 class StockLevel(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="stock_level")
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="stock_level")
-    quantity = models.DecimalField(max_digits=6, decimal_places=0)
+    quantity = models.PositiveIntegerField(default=0)
 
 class StockMovement(models.Model):
     class Type(models.TextChoices):
@@ -44,8 +44,8 @@ class StockMovement(models.Model):
 
     type = models.CharField(max_length=50, choices=Type.choices, default=Type.RECEIPT)
 
-    from_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="sent")
-    to_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="received")
+    from_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="sent", null=True, blank=True)
+    to_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="received", null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="movement_created")
     quantity = models.DecimalField(max_digits=6, decimal_places=0)
     timestamp = models.DateTimeField(auto_now_add=True)
