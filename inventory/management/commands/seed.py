@@ -85,3 +85,4 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"Seeded 2 locations, 10 products, {variant_count} variants, 3 users."
         ))
+
