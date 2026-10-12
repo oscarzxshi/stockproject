@@ -44,9 +44,11 @@ class StockMovement(models.Model):
 
     type = models.CharField(max_length=50, choices=Type.choices, default=Type.RECEIPT)
 
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="movements")
     from_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="sent", null=True, blank=True)
     to_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="received", null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="movement_created")
-    quantity = models.DecimalField(max_digits=6, decimal_places=0)
+    quantity = models.PositiveIntegerField(default=0)
+    reference = models.CharField(max_length=100, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
