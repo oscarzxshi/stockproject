@@ -10,7 +10,42 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Stock Manager</a>
+            <a class="navbar-brand" href="{% url 'index' %}">Stock Manager</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navLinks">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'products' %}active{% endif %}" href="#">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'stock' %}active{% endif %}" href="#">Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'receive' %}active{% endif %}" href="#">Receive</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'transfers' %}active{% endif %}" href="#">Transfers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="#">History</a>
+                    </li>
+                </ul>
+
+                {% if user.is_authenticated %}
+                <span class="navbar-text me-3">{{ user.username }} ({{ user.get_role_display }})</span>
+                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
