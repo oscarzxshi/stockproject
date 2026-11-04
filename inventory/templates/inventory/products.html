@@ -1,0 +1,38 @@
+{% extends "inventory/layout.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">Products</h1>
+
+{% if products %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Wholesale Price</th>
+                <th>Colours</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>£{{ product.standard_wholesale_price }}</td>
+                <td>
+                    {% for variant in product.variants.all %}
+                    <span class="badge text-bg-secondary">{{ variant.colour }}</span>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-muted">No products yet.</p>
+{% endif %}
+
+{% endblock %}

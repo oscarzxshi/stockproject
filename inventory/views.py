@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from .models import Product
 
 # Create your views here.
 
@@ -10,3 +11,8 @@ def index(request):
 
 class StaffLoginView(LoginView):
     template_name = "inventory/login.html"
+
+@login_required
+def products(request):
+    products = Product.objects.prefetch_related("variants").order_by("category", "name")
+    return render(request, "inventory/products.html", {"products": products})
