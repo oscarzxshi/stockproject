@@ -1,0 +1,60 @@
+{% extends "inventory/layout.html" %}
+{% load static %}
+{% block title %}Add Product{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">Add Product</h1>
+
+<form method="post" id="product-form">
+    {% csrf_token %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Product details</h5>
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Colour variants</h5>
+            {{ formset.management_form }}
+
+            <div class="row g-2 mb-1">
+                <div class="col"><small class="text-muted">Colour</small></div>
+                <div class="col"><small class="text-muted">SKU</small></div>
+            </div>
+
+            <div id="variant-rows">
+                {% for variant_form in formset %}
+                <div class="row g-2 mb-2 variant-row">
+                    <div class="col">{{ variant_form.colour }}</div>
+                    <div class="col">{{ variant_form.sku }}</div>
+                </div>
+                {% if variant_form.errors %}<div class="text-danger small">{{ variant_form.errors }}</div>{% endif %}
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-variant" class="btn btn-outline-secondary btn-sm mt-2">+ Add another colour</button>
+
+            <div id="empty-form-template" class="d-none">
+                <div class="row g-2 mb-2 variant-row">
+                    <div class="col">{{ formset.empty_form.colour }}</div>
+                    <div class="col">{{ formset.empty_form.sku }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save product</button>
+</form>
+
+<script src="{% static 'inventory/add_product.js' %}"></script>
+
+{% endblock %}
