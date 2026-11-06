@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
-from .models import Product
+from django.db.models import Prefetch, Sum
+from .models import Product, Variant, StockLevel, StockMovement
 from .forms import ProductForm, VariantFormSet
 
 # Create your views here.
@@ -41,3 +42,17 @@ def add_product(request):
         formset = VariantFormSet()
 
     return render(request, "inventory/add_product.html", {"form": form, "formset": formset})
+
+@login_required
+def product_detail(request, product_id):
+    variants = Variant.objects.annotate(
+        total_stock=Sum("stock_level__quantity")
+    ).prefetch_related(
+        Prefetch("stock_level", queryset=StockLevel.objects.select_related("location"))
+    )
+    product = get_object_or_404(
+        Product.objects.prefetch_related(Prefetch("variants", queryset=variants)),
+        pk=product_id,
+    )
+    return render(request, "inventory/product_detail.html", {"product": product})
+

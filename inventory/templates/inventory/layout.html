@@ -22,7 +22,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="#">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'products' %}active{% endif %}" href="{% url 'products' %}">Products</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'products' or request.resolver_match.url_name == 'product_detail' or request.resolver_match.url_name == 'add_product' %}active{% endif %}" href="{% url 'products' %}">Products</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'stock' %}active{% endif %}" href="#">Stock</a>
