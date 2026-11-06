@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Prefetch, Sum
-from .models import Product, Variant, StockLevel, StockMovement
+from .models import Product, Variant, StockLevel, StockMovement, Location
 from .forms import ProductForm, VariantFormSet
 
 # Create your views here.
@@ -56,3 +57,29 @@ def product_detail(request, product_id):
     )
     return render(request, "inventory/product_detail.html", {"product": product})
 
+@login_required
+def stock(request):
+    locations = Location.objects.order_by("name")
+
+    location = None
+    location_id = request.GET.get("location", "")
+    if location_id.isdigit():
+        location = locations.filter(pk=location_id).first()
+    if location is None:
+        location = locations.first()
+
+    levels = StockLevel.objects.none()
+    if location:
+        levels = (
+            StockLevel.objects.filter(location=location)
+            .select_related("variant__product")
+            .order_by("variant__product__name", "variant__colour")
+        )
+
+    page_obj = Paginator(levels, 20).get_page(request.GET.get("page"))
+
+    return render(request, "inventory/stock.html", {
+        "locations": locations,
+        "location": location,
+        "page_obj": page_obj,
+    })

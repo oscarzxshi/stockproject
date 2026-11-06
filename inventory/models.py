@@ -19,12 +19,16 @@ class Product(models.Model):
     category = models.CharField(max_length=50)
     standard_wholesale_price = models.DecimalField(max_digits=8, decimal_places=2)
     identifier = models.CharField(max_length=10, unique=True)
+    def __str__(self):
+        return self.name
 
 class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
     colour = models.CharField(max_length=50)
     sku = models.CharField(max_length=50, unique=True)
-
+    def __str__(self):
+        return f"{self.product.name} - {self.colour}"
+    
 class Location(models.Model):
     name = models.CharField(max_length=50)
 

@@ -1,0 +1,56 @@
+{% extends "inventory/layout.html" %}
+{% block title %}Stock{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">Stock</h1>
+
+<ul class="nav nav-pills mb-4">
+    {% for loc in locations %}
+    <li class="nav-item">
+        <a class="nav-link {% if loc.id == location.id %}active{% endif %}" href="?location={{ loc.id }}">{{ loc.name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+
+{% if page_obj %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Colour</th>
+                <th>SKU</th>
+                <th class="text-end">Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for level in page_obj %}
+            <tr>
+                <td><a href="{% url 'product_detail' level.variant.product.id %}" class="text-decoration-none">{{ level.variant.product.name }}</a></td>
+                <td>{{ level.variant.colour }}</td>
+                <td>{{ level.variant.sku }}</td>
+                <td class="text-end">{{ level.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?location={{ location.id }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?location={{ location.id }}&page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% else %}
+<p class="text-muted">No stock at this location yet.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends "inventory/layout.html" %}
+{% load static %}
 {% block title %}Products{% endblock %}
 {% block content %}
 
@@ -22,8 +23,8 @@
         </thead>
         <tbody>
             {% for product in products %}
-            <tr>
-                <td><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></td>
+            <tr class="clickable-row" data-href="{% url 'product_detail' product.id %}">
+                <td>{{ product.name }}</td>
                 <td>{{ product.category }}</td>
                 <td>£{{ product.standard_wholesale_price }}</td>
                 <td>
@@ -39,5 +40,7 @@
 {% else %}
 <p class="text-muted">No products yet.</p>
 {% endif %}
+
+<script src="{% static 'inventory/products.js' %}"></script>
 
 {% endblock %}

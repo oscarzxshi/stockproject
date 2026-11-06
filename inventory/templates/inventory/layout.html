@@ -19,13 +19,13 @@
             <div class="collapse navbar-collapse" id="navLinks">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="#">Dashboard</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'index' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'products' or request.resolver_match.url_name == 'product_detail' or request.resolver_match.url_name == 'add_product' %}active{% endif %}" href="{% url 'products' %}">Products</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'stock' %}active{% endif %}" href="#">Stock</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'stock' %}active{% endif %}" href="{% url 'stock' %}">Stock</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'receive' %}active{% endif %}" href="#">Receive</a>
