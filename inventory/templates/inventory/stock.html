@@ -37,16 +37,18 @@
 </div>
 
 {% if page_obj.has_other_pages %}
-<nav>
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?location={{ location.id }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
-        {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-        {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?location={{ location.id }}&page={{ page_obj.next_page_number }}">Next</a></li>
-        {% endif %}
-    </ul>
+<nav class="fixed-bottom bg-body py-3 border-top">
+    <div class="container mt-4 pb-5">
+        <ul class="pagination mb-0 justify-content-center">
+            <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                <a class="page-link" href="{% if page_obj.has_previous %}?location={{ location.id }}&page={{ page_obj.previous_page_number }}{% else %}#{% endif %}">Previous</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{% if page_obj.has_next %}?location={{ location.id }}&page={{ page_obj.next_page_number }}{% else %}#{% endif %}">Next</a>
+            </li>
+        </ul>
+    </div>
 </nav>
 {% endif %}
 {% else %}

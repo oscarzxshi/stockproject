@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from inventory.models import Product, Variant, Location, User
+from inventory.services import move_stock
 
 import random
 from django.core.management.base import BaseCommand
@@ -52,35 +53,12 @@ class Command(BaseCommand):
                 )
                 variant_count += 1
 
-                if created:
-                    # Receive stock into the warehouse
+                if not StockLevel.objects.filter(variant=variant).exists():
                     qty = random.randint(20, 100)
-                    StockMovement.objects.create(
-                        type=StockMovement.Type.RECEIPT,
-                        from_location=None,
-                        to_location=warehouse,
-                        user=admin,
-                        quantity=qty,
-                    )
-                    level, _ = StockLevel.objects.get_or_create(variant=variant, location=warehouse, defaults={"quantity": 0})
-                    level.quantity += qty
-                    level.save()
+                    move_stock(variant, qty, None, warehouse, StockMovement.Type.RECEIPT, admin)
 
-                    # Transfer some to the shop
                     transfer_qty = random.randint(5, min(20, qty))
-                    StockMovement.objects.create(
-                        type=StockMovement.Type.TRANSFER,
-                        from_location=warehouse,
-                        to_location=shop,
-                        user=warehouse_user,
-                        quantity=transfer_qty,
-                    )
-                    level.quantity -= transfer_qty
-                    level.save()
-
-                    shop_level, _ = StockLevel.objects.get_or_create(variant=variant, location=shop, defaults={"quantity": 0})
-                    shop_level.quantity += transfer_qty
-                    shop_level.save()
+                    move_stock(variant, transfer_qty, warehouse, shop, StockMovement.Type.TRANSFER, warehouse_user)
 
         self.stdout.write(self.style.SUCCESS(
             f"Seeded 2 locations, 10 products, {variant_count} variants, 3 users."
