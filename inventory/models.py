@@ -45,6 +45,7 @@ class StockMovement(models.Model):
         RECEIPT = "RECEIPT", "receipt"
         TRANSFER = "TRANSFER", "transfer"
         SALE = "SALE", "sale"
+        ADJUSTMENT = "ADJUSTMENT", "adjustment"
 
     type = models.CharField(max_length=50, choices=Type.choices, default=Type.RECEIPT)
 

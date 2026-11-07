@@ -31,7 +31,13 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'receive' %}active{% endif %}" href="#">Receive</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'transfers' %}active{% endif %}" href="#">Transfers</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'transfers' %}active{% endif %}" href="{% url 'transfer' %}">Transfers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'sale' %}">Sale</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'adjustment' %}">Adjustment</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="#">History</a>
@@ -52,6 +58,10 @@
     </nav>
 
     <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        
         {% block content %}
         {% endblock %}
     </div>

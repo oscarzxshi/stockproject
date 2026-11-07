@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Sum
 from .models import Product, Variant, StockLevel, StockMovement, Location
-from .forms import ProductForm, VariantFormSet
+from .forms import ProductForm, VariantFormSet, SaleForm, AdjustmentForm, TransferForm
+from .services import move_stock
 
 # Create your views here.
 
@@ -83,3 +84,53 @@ def stock(request):
         "location": location,
         "page_obj": page_obj,
     })
+
+def _form_page(request, form, title, button):
+    return render(request, "inventory/stock_form.html", {"form": form, "title": title, "button": button})
+
+def _apply(form, **move):
+    """Run move_stock, turning failures into a form error. Returns True on success."""
+    try:
+        move_stock(**move)
+    except ValueError as e:
+        form.add_error(None, str(e))
+    except StockLevel.DoesNotExist:
+        form.add_error(None, "There is no stock of this item at that location.")
+    else:
+        return True
+    return False
+
+@login_required
+def sale(request):
+    form = SaleForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        if _apply(form, variant=d["variant"], qty=d["quantity"], from_loc=d["location"], to_loc=None,
+                  mtype=StockMovement.Type.SALE, user=request.user, ref=d["reference"]):
+            messages.success(request, f"Sold {d['quantity']} x {d['variant']}.")
+            return redirect("sale")
+    return _form_page(request, form, "Record a sale", "Record sale")
+
+@login_required
+def adjustment(request):
+    form = AdjustmentForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        adding = d["direction"] == "ADD"
+        if _apply(form, variant=d["variant"], qty=d["quantity"],
+                  from_loc=None if adding else d["location"], to_loc=d["location"] if adding else None,
+                  mtype=StockMovement.Type.ADJUSTMENT, user=request.user, ref=d["reason"]):
+            messages.success(request, "Stock adjusted.")
+            return redirect("adjustment")
+    return _form_page(request, form, "Adjust stock", "Save adjustment")
+
+@login_required
+def transfer(request):
+    form = TransferForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        if _apply(form, variant=d["variant"], qty=d["quantity"], from_loc=d["from_location"],
+                  to_loc=d["to_location"], mtype=StockMovement.Type.TRANSFER, user=request.user):
+            messages.success(request, f"Moved {d['quantity']} x {d['variant']} to {d['to_location']}.")
+            return redirect("transfer")
+    return _form_page(request, form, "Transfer stock", "Transfer")
