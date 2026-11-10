@@ -4,9 +4,9 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Sum
+from django.db.models import Prefetch, Sum, Q
 from .models import Product, Variant, StockLevel, StockMovement, Location
-from .forms import ProductForm, VariantFormSet, SaleForm, AdjustmentForm, TransferForm
+from .forms import ProductForm, VariantFormSet, ReceiveForm, SaleForm, AdjustmentForm, TransferForm, MovementFilterForm
 from .services import move_stock
 
 # Create your views here.
@@ -101,6 +101,17 @@ def _apply(form, **move):
     return False
 
 @login_required
+def receive(request):
+    form = ReceiveForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        if _apply(form, variant=d["variant"], qty=d["quantity"], from_loc=None, to_loc=d["location"],
+                  mtype=StockMovement.Type.RECEIPT, user=request.user, ref=d["reference"]):
+            messages.success(request, f"Received {d['quantity']} x {d['variant']} into {d['location']}.")
+            return redirect("receive")
+    return _form_page(request, form, "Receive stock", "Receive")
+
+@login_required
 def sale(request):
     form = SaleForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -134,3 +145,36 @@ def transfer(request):
             messages.success(request, f"Moved {d['quantity']} x {d['variant']} to {d['to_location']}.")
             return redirect("transfer")
     return _form_page(request, form, "Transfer stock", "Transfer")
+
+@login_required
+def history(request):
+    form = MovementFilterForm(request.GET or None)
+    movements = StockMovement.objects.select_related(
+        "variant__product", "from_location", "to_location", "user"
+    ).order_by("-timestamp", "-id")
+
+    if form.is_valid():
+        d = form.cleaned_data
+        if d["variant"]:
+            movements = movements.filter(variant=d["variant"])
+        if d["location"]:
+            movements = movements.filter(Q(from_location=d["location"]) | Q(to_location=d["location"]))
+        if d["type"]:
+            movements = movements.filter(type=d["type"])
+        if d["user"]:
+            movements = movements.filter(user=d["user"])
+        if d["date_from"]:
+            movements = movements.filter(timestamp__date__gte=d["date_from"])
+        if d["date_to"]:
+            movements = movements.filter(timestamp__date__lte=d["date_to"])
+
+    page_obj = Paginator(movements, 15).get_page(request.GET.get("page"))
+
+    params = request.GET.copy()
+    params.pop("page", None)
+
+    return render(request, "inventory/history.html", {
+        "form": form,
+        "page_obj": page_obj,
+        "querystring": params.urlencode(),
+    })

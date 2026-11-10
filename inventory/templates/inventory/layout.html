@@ -28,7 +28,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'stock' %}active{% endif %}" href="{% url 'stock' %}">Stock</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'receive' %}active{% endif %}" href="#">Receive</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'receive' %}active{% endif %}" href="{% url 'receive' %}">Receive</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'transfers' %}active{% endif %}" href="{% url 'transfer' %}">Transfers</a>
@@ -40,7 +40,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'adjustment' %}">Adjustment</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="#">History</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}" href="{% url 'history' %}">History</a>
                     </li>
                 </ul>
 

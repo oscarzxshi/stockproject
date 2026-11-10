@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Product, Variant, Location
+from .models import Product, Variant, Location, StockMovement, User
 
 
 class ProductForm(forms.ModelForm):
@@ -35,6 +35,15 @@ class BootstrapMixin:
             field.widget.attrs["class"] = "form-select" if is_select else "form-control"
 
 
+class ReceiveForm(BootstrapMixin, forms.Form):
+    variant = forms.ModelChoiceField(queryset=Variant.objects.select_related("product"))
+    location = forms.ModelChoiceField(queryset=Location.objects.all(), label="Received into")
+    quantity = forms.IntegerField(min_value=1)
+    reference = forms.CharField(
+        max_length=100, required=False, label="Reference",
+        help_text="Optional, e.g. a delivery note or supplier order number.",
+    )
+
 class SaleForm(BootstrapMixin, forms.Form):
     variant = forms.ModelChoiceField(queryset=Variant.objects.select_related("product"))
     location = forms.ModelChoiceField(queryset=Location.objects.all(), label="Sold from")
@@ -63,3 +72,16 @@ class TransferForm(BootstrapMixin, forms.Form):
         if data.get("from_location") and data.get("from_location") == data.get("to_location"):
             raise forms.ValidationError("Choose two different locations.")
         return data
+
+class MovementFilterForm(BootstrapMixin, forms.Form):
+    variant = forms.ModelChoiceField(
+        queryset=Variant.objects.select_related("product"), required=False, empty_label="All variants")
+    location = forms.ModelChoiceField(
+        queryset=Location.objects.all(), required=False, empty_label="All locations")
+    type = forms.ChoiceField(
+        choices=[("", "All types")] + StockMovement.Type.choices, required=False)
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(), required=False, empty_label="All users")
+    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+
